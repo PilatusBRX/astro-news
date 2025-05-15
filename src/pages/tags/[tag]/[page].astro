@@ -1,0 +1,113 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BlogPost from "@/layouts/BlogPost.astro";
+import FormattedDate from "@/components/FormattedDate.astro";
+import Pagination from "@/components/Pagination.astro";
+import { type BlogProps } from "@/types/blog";
+import { slugify } from "@/utils/slugify";
+
+// Gera as rotas para todas as tags com suas páginas
+export async function getStaticPaths() {
+  const postsPerPage = 4;
+  const allPosts = (await getCollection("blog")) as BlogProps[];
+
+  // Extrair todas as tags únicas
+  const uniqueTags = [
+    ...new Set(allPosts.map((post) => post.data.tags).flat()),
+  ];
+
+  const paths = [];
+
+  // Para cada tag, criar todas as páginas necessárias
+  for (const tag of uniqueTags) {
+    // Filtrar posts que contêm essa tag
+    const filteredPosts = allPosts.filter((post) =>
+      post.data.tags?.includes(tag)
+    );
+
+    // Ordenar posts por data (mais recente primeiro)
+    const sortedPosts = filteredPosts.sort(
+      (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+    );
+
+    // Calcular total de páginas para esta tag
+    const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
+
+    // Criar rota para cada página da tag
+    for (let page = 1; page <= totalPages; page++) {
+      // Obter posts para esta página específica
+      const pageStartIndex = (page - 1) * postsPerPage;
+      const pageEndIndex = pageStartIndex + postsPerPage;
+      const pagePosts = sortedPosts.slice(pageStartIndex, pageEndIndex);
+
+      paths.push({
+        params: {
+          tag: slugify(tag), 
+          page: page.toString(),
+        },
+        props: {
+          posts: pagePosts,
+          tag,
+          currentPage: page,
+          totalPages,
+        },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { tag, page } = Astro.params;
+const { posts, currentPage, totalPages } = Astro.props;
+
+// URL base para paginação (sem barra no final)
+const paginationUrl = `/tags/${tag}`;
+---
+
+<BlogPost
+  title={`Posts com a tag "${tag}" - Página ${currentPage}`}
+  description={`Posts com a tag ${tag} - Página ${currentPage} de ${totalPages}`}
+>
+  <h1>Posts com a tag "{tag}"</h1>
+  <p>Página {currentPage} de {totalPages}</p>
+
+  <div class="post-list">
+    {
+      posts.map((post) => (
+        <article class="category-post">
+          <a href={`/blog/${post.id}`}>
+            <h2>{post.data.title}</h2>
+            <p class="date">
+              <time class="date">
+                <FormattedDate date={post.data.pubDate} />
+              </time>
+            </p>
+            {post.data.description && (
+              <p class="description">{post.data.description}</p>
+            )}
+          </a>
+        </article>
+      ))
+    }
+  </div>
+
+  {
+    totalPages > 1 && (
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        url={paginationUrl}
+      />
+    )
+  }
+</BlogPost>
+
+<style>
+  .category-post {
+    padding: 24px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 16px;
+  }
+</style>

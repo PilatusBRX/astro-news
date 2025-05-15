@@ -1,0 +1,53 @@
+---
+import { slugify } from "@/utils/slugify";
+import FormattedDate from "./FormattedDate.astro";
+const { relatedPosts } = Astro.props;
+---
+
+{
+  relatedPosts.length > 0 ? (
+    relatedPosts.map((post) => (
+      <div class="post">
+        <h3 class="h4">
+          <a href={`/blog/${post.id}`}>{post.data.title}</a>
+        </h3>
+        <small>
+          <a href={`/author/${slugify(post.data.author)}/`}>
+            {post.data.author}
+          </a>{" "}
+          • <FormattedDate date={post.data.pubDate} />
+        </small>
+      </div>
+    ))
+  ) : (
+    <p>Nenhum post relacionado encontrado.</p>
+  )
+}
+
+<style>
+  .post {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(var(--gray), 0.2);
+  }
+
+  .post:last-child {
+    border-bottom: none;
+  }
+
+  .post h3 {
+    margin-bottom: 0.5rem;
+  }
+
+  .post a {
+    text-decoration: none;
+  }
+
+  .post a:hover {
+    text-decoration: underline;
+  }
+
+  .post small {
+    color: rgb(var(--gray));
+  }
+</style>

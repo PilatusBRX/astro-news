@@ -1,0 +1,113 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BlogPost from "@/layouts/BlogPost.astro";
+import FormattedDate from "@/components/FormattedDate.astro";
+import Pagination from "@/components/Pagination.astro";
+import { type BlogProps } from "@/types/blog";
+import { slugify } from "@/utils/slugify";
+
+// Gera as rotas para todas as categorias com suas páginas
+export async function getStaticPaths() {
+  const postsPerPage = 4;
+  const allPosts = (await getCollection("blog")) as BlogProps[];
+
+  // Extrair todas as categorias únicas
+  const uniqueCats = [
+    ...new Set(allPosts.map((post) => post.data.categories).flat()),
+  ];
+
+  const paths = [];
+
+  // Para cada categoria, criar todas as páginas necessárias
+  for (const category of uniqueCats) {
+    // Filtrar posts que contêm essa categoria
+    const filteredPosts = allPosts.filter((post) =>
+      post.data.categories?.includes(category)
+    );
+
+    // Ordenar posts por data (mais recente primeiro)
+    const sortedPosts = filteredPosts.sort(
+      (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+    );
+
+    // Calcular total de páginas para esta categoria
+    const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
+
+    // Criar rota para cada página da categoria
+    for (let page = 1; page <= totalPages; page++) {
+      // Obter posts para esta página específica
+      const pageStartIndex = (page - 1) * postsPerPage;
+      const pageEndIndex = pageStartIndex + postsPerPage;
+      const pagePosts = sortedPosts.slice(pageStartIndex, pageEndIndex);
+
+      paths.push({
+        params: {
+          category: slugify(category) ,
+          page: page.toString(),
+        },
+        props: {
+          posts: pagePosts,
+          category,
+          currentPage: page,
+          totalPages,
+        },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { category, page } = Astro.params;
+const { posts, currentPage, totalPages } = Astro.props;
+
+// URL base para paginação (sem barra no final)
+const paginationUrl = `/categories/${category}`;
+---
+
+<BlogPost
+  title={`Posts com a categoria "${category}" - Página ${currentPage}`}
+  description={`Posts com a categoria ${category} - Página ${currentPage} de ${totalPages}`}
+>
+  <h1>Posts com a categoria "{category}"</h1>
+  <p>Página {currentPage} de {totalPages}</p>
+
+  <div class="post-list">
+    {
+      posts.map((post) => (
+        <article class="category-post">
+          <a href={`/blog/${post.id}`}>
+            <h2>{post.data.title}</h2>
+            <p class="date">
+              <time class="date">
+                <FormattedDate date={post.data.pubDate} />
+              </time>
+            </p>
+            {post.data.description && (
+              <p class="description">{post.data.description}</p>
+            )}
+          </a>
+        </article>
+      ))
+    }
+  </div>
+
+  {
+    totalPages > 1 && (
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        url={paginationUrl}
+      />
+    )
+  }
+</BlogPost>
+
+<style>
+  .category-post {
+    padding: 24px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 16px;
+  }
+</style>

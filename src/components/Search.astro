@@ -1,0 +1,118 @@
+---
+import { Icon } from "astro-icon/components";
+---
+
+<section class="search-section">
+  <div id="search" style="display: none;"></div>
+  <div id="close-search" style="display: none;" aria-label="Fechar pesquisa">
+    <Icon 
+    name="ios-close-circle" 
+    size={32}
+    />
+  </div>
+</section>
+<script defer is:inline>
+  window.addEventListener("DOMContentLoaded", (event) => {
+    // @ts-ignore
+    new PagefindUI({
+      element: "#search",
+      debounceTimeoutMs: 500,
+      showEmptyFilters: false,
+      showSubResults: false,
+      showImages: false,
+      excerptLength: 15,
+      translations: {
+        placeholder: "Pesquisar...",
+      },
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const searchDiv = document.getElementById("search");
+    const searchButton = document.getElementById("search-button");
+    const closeSearch = document.getElementById("close-search");
+
+    function openSearch() {
+      searchDiv.style.display = "block";
+      closeSearch.style.display = "block";
+    }
+
+    function closeSearchArea() {
+      searchDiv.style.display = "none";
+      closeSearch.style.display = "none";
+    }
+
+    searchButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      openSearch();
+    });
+
+    closeSearch.addEventListener("click", (event) => {
+      event.stopPropagation();
+      closeSearchArea();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!searchDiv.contains(event.target) && event.target !== searchButton) {
+        closeSearchArea();
+      }
+    });
+  });
+</script>
+
+<style>
+  .search-section {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 75%;
+    margin: 32px auto;
+    height: 100%;
+  }
+
+  button#search-button {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+
+  button#search-button:hover {
+    background-color: #3367d6;
+  }
+
+  #search {
+    display: none;
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 94%;
+  }
+
+  #search input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+
+  .search-visible {
+    display: block !important;
+  }
+  #close-search {
+    cursor: pointer;
+    width: 32px;
+    position: relative;
+    top: 10px;
+  }
+</style>

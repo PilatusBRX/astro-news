@@ -1,0 +1,27 @@
+---
+import { getCollection } from "astro:content";
+import { type BlogProps } from "@/types/blog";
+import { slugify } from "@/utils/slugify";
+
+// Redireciona para a primeira página de cada categoria
+export async function getStaticPaths() {
+  const allPosts = (await getCollection("blog")) as BlogProps[];
+
+  // Extrair todas as categorias únicas
+  const uniqueCats = [
+    ...new Set(allPosts.map((post) => post.data.categories).flat()),
+  ];
+
+  // Criar um caminho para cada categoria
+  return uniqueCats.map((category) => {
+    return {
+      params: { category: slugify(category) },
+    };
+  });
+}
+
+const { category } = Astro.params;
+
+// Redireciona para a página 1 da categoria
+return Astro.redirect(`/categories/${category}/1`);
+---

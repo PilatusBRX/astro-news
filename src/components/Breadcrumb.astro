@@ -1,0 +1,52 @@
+---
+const { currentPath = "" } = Astro.props;
+const pathParts = currentPath.split("/").filter((part: string) => part !== "");
+---
+
+<nav aria-label="Breadcrumb" class="breadcrumb">
+  <ul itemscope itemtype="http://schema.org/BreadcrumbList">
+    <li
+      itemprop="itemListElement"
+      itemscope
+      itemtype="http://schema.org/ListItem"
+    >
+      <a itemprop="item" href="/">Home</a>
+    </li>
+    {
+      pathParts.map((part: string, index: number) => (
+        <li
+          itemprop="itemListElement"
+          itemscope
+          itemtype="http://schema.org/ListItem"
+        >
+          {index < pathParts.length - 1 ? (
+            <a
+              href={`/${pathParts.slice(0, index + 1).join("/")}`}
+              itemprop="item"
+            >
+              <span itemprop="name">{part.replace(/-/g, " ")}</span>
+            </a>
+          ) : (
+            <span itemprop="name" aria-current="page">
+              {part.replace(/-/g, " ")}
+            </span>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .breadcrumb ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    gap: 0.5rem;
+  }
+
+  .breadcrumb li:not(:last-child)::after {
+    content: "›";
+    margin-left: 0.5rem;
+  }
+</style>

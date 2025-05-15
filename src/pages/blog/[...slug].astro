@@ -1,0 +1,134 @@
+---
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import { Image } from "astro:assets";
+import BlogPost from "@/layouts/BlogPost.astro";
+import FormattedDate from "@/components/FormattedDate.astro";
+import SocialShares from "@/components/SocialShares.astro";
+import PostCard from "@/components/PostCard.astro";
+import CategoryCloud from "@/components/TagCloud.astro";
+import TagCloud from "@/components/CategoryCloud.astro";
+import RecentPosts from "@/components/RecentPosts.astro";
+import { getRelatedPosts } from "@/utils/relatedPosts";
+import { slugify } from "@/utils/slugify";
+import { type BlogProps } from "@/types/blog";
+
+export async function getStaticPaths() {
+  const posts = (await getCollection("blog")) as BlogProps[];
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      // Pré-computa os posts relacionados durante a build
+      relatedPosts: getRelatedPosts(post, posts),
+    },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<"blog">;
+  relatedPosts: CollectionEntry<"blog">[];
+}
+
+const { post, relatedPosts } = Astro.props;
+const { Content } = await render(post);
+const { title, pubDate, heroImage, author, categories, tags = [] } = post.data;
+---
+
+<BlogPost {...post.data}>
+  <Image
+    width={1200}
+    height={360}
+    object-fit="cover"
+    src={heroImage}
+    alt={title}
+    format="webp"
+    decoding="async"
+    loading="lazy"
+    quality={80}
+    class="post-img"
+  />
+  <h1 class="post-title">{title}</h1>
+
+  <time class="date">
+    <FormattedDate date={pubDate} />
+  </time>
+
+  <small>
+    <a href={`/author/${slugify(author)}/`}>
+      {author}
+    </a>
+  </small>
+
+  <div class="post-tags">
+    <p>Tags:</p>
+    <div class="tags">
+      {
+        tags.map((tag: string) => (
+          <a href={`/tags/${tag}`} class="tag">
+            {tag}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="post-tags">
+    <p>Categorias:</p>
+    <div class="tags">
+      {
+        categories.map((category: string) => (
+          <a href={`/categories/${category}`} class="tag">
+            {category}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+
+  <Content />
+
+  <RecentPosts />
+  <TagCloud />
+  <CategoryCloud />
+  <SocialShares />
+
+  <!-- Posts relacionados por tags-->
+  {
+    relatedPosts && (
+      <section class="related-posts">
+        <h2>Posts Relacionados</h2>
+        <div class="posts-grid">
+          {relatedPosts.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</BlogPost>
+
+<style>
+  .post-tags {
+    margin: 2rem 0;
+  }
+
+  .post-tags .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+  }
+
+  .tag:hover {
+    background-color: #e0e0e0;
+  }
+</style>

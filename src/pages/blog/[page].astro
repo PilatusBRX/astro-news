@@ -1,0 +1,43 @@
+---
+import { getCollection } from "astro:content";
+import BlogPost from "@/layouts/BlogPost.astro";
+import PostList from "@/components/PostList.astro";
+
+export async function getStaticPaths() {
+  const postsPerPage = 3;
+  const allPosts = await getCollection("blog");
+  const totalPages = Math.ceil(allPosts.length / postsPerPage);
+
+  // Gera rotas para todas as páginas, exceto a primeira (que é /blog)
+  const paths = [];
+  for (let i = 2; i <= totalPages; i++) {
+    paths.push({
+      params: { page: i.toString() },
+      props: { page: i },
+    });
+  }
+
+  return paths;
+}
+
+const { page } = Astro.props;
+
+// Para verificação de página válida (opcional)
+const allPosts = await getCollection("blog");
+const postsPerPage = 8;
+const totalPages = Math.ceil(allPosts.length / postsPerPage);
+
+// Redireciona para a primeira página se a página for inválida ou for a página 1
+if (page > totalPages || page == 1) {
+  return Astro.redirect("/blog");
+}
+---
+
+<BlogPost
+  title={`Blog - Página ${page}`}
+  description={`Página ${page} do blog`}
+>
+  <section>
+    <PostList page={page} postsPerPage={postsPerPage} />
+  </section>
+</BlogPost>
