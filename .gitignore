@@ -7,7 +7,7 @@ dist/
 node_modules/
 
 # some folders
-tinacms-md
+tinacms-md/
 
 # logs
 npm-debug.log*
