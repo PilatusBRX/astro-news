@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import PostCard from "./PostCard.astro";
+import { type BlogProps } from "@/types/blog";
+
+//Quantos posts 
+const { page = 1, postsPerPage = 4 } = Astro.props;
+// Converte para número caso venha como string
+const currentPage = typeof page === "string" ? parseInt(page) : page;
+
+
+// Busca todos os posts ordenados por data
+const allPosts = ((await getCollection("blog")) as BlogProps[]).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+// Obtém os posts para a página atual
+const startIndex = (currentPage - 1) * postsPerPage;
+const endIndex = startIndex + postsPerPage;
+const posts = allPosts.slice(startIndex, endIndex);
+
+---
+
+<div class="post-list">
+  {posts.map((post) => <PostCard post={post} />)}
+</div>
+  
+<style>
+  .post-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (max-width: 720px) {
+    .post-list {
+      gap: 0.5em;
+    }
+  }
+</style>

@@ -1,0 +1,126 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BlogPost from "@/layouts/BlogPost.astro";
+import PostCard from "@/components/PostCard.astro";
+import { type BlogProps } from "@/types/blog";
+
+// Função para obter os caminhos estáticos com paginação
+export const getStaticPaths = async ({ paginate }) => {
+  const allPosts = (await getCollection("blog")) as BlogProps[];
+
+  // Obtenha todas as tags únicas
+  const uniqueCategories = [
+    ...new Set(allPosts.map((post) => post.data.categories).flat()),
+  ];
+
+  // Crie rotas paginadas para cada tag
+  return uniqueCategories.flatMap((category) => {
+    const filteredPosts = allPosts.filter((post) =>
+      post.data.categories?.includes(category)
+    );
+
+    // Use paginate para criar páginas para esta tag
+    return paginate(filteredPosts, {
+      params: { category },
+      pageSize: 2,
+      props: { category },
+    });
+  });
+};
+
+// Obtenha as props
+const { page, category } = Astro.props;
+const currentPage = Number(page.currentPage);
+const lastPage = Number(page.lastPage);
+---
+
+<BlogPost
+  title={`Posts sobre ${category}`}
+  description={`Todos os posts relacionados à categoria ${category} - Página ${page.currentPage} de ${page.lastPage}`}
+>
+  <div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+      <a href="/categories" class="text-blue-600 hover:underline">
+        &larr; Voltar para todas as categorias
+      </a>
+    </div>
+
+    <h1 class="text-4xl font-bold mb-6">Posts sobre #{category}</h1>
+
+    {
+      page.data.length === 0 ? (
+        <p>Nenhum post encontrado com esta categoria.</p>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {page.data.map((post) => (
+            <PostCard post={post} />
+          ))}
+        </div>
+      )
+    }
+
+    {
+      lastPage > 1 && (
+        <nav aria-label="Paginação da tag {tag}" class="pagination">
+          {currentPage > 1 ? (
+            <a href={page.url.prev}>&larr; Anterior</a>
+          ) : (
+            <span class="disabled">&larr; Anterior</span>
+          )}
+
+          {Array.from({ length: lastPage }, (_, i) => {
+            const pageNum = i + 1;
+            const href =
+              pageNum === 1
+                ? `/categories/${category}`
+                : `/categories/${category}/${pageNum}`;
+            return currentPage === pageNum ? (
+              <span class="current">{pageNum}</span>
+            ) : (
+              <a href={href}>{pageNum}</a>
+            );
+          })}
+
+          {currentPage < lastPage ? (
+            <a href={page.url.next}>Próximo &rarr;</a>
+          ) : (
+            <span class="disabled">Próximo &rarr;</span>
+          )}
+        </nav>
+      )
+    }
+  </div>
+</BlogPost>
+<style>
+  .pagination {
+    display: flex;
+    gap: 0.5rem;
+    font-family: sans-serif;
+  }
+
+  .pagination a,
+  .pagination span {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    color: #000;
+  }
+
+  .pagination a:hover {
+    background-color: #f0f0f0;
+  }
+
+  .pagination .current {
+    background-color: #0070f3;
+    color: white;
+    font-weight: bold;
+    border: none;
+  }
+
+  .pagination .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+</style>

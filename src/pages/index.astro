@@ -1,0 +1,58 @@
+---
+import { getCollection } from "astro:content";
+import BlogPost from "@/layouts/BlogPost.astro";
+import PostCard from "@/components/PostCard.astro";
+import { type BlogProps } from "@/types/blog";
+
+//Quantos posts
+const { page = 1, postsPerPage = 6 } = Astro.props;
+// Converte para número caso venha como string
+const currentPage = typeof page === "string" ? parseInt(page) : page;
+
+// Busca todos os posts ordenados por data
+const allPosts = ((await getCollection("blog")) as BlogProps[]).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+// Obtém os posts para a página atual
+const startIndex = (currentPage - 1) * postsPerPage;
+const endIndex = startIndex + postsPerPage;
+const posts = allPosts.slice(startIndex, endIndex);
+---
+
+<BlogPost
+  title="Tootsie lemon soufflé"
+  description="Soufflé bonbon toffee sweet dragée drops oat o lollipop pastry pie marzipan o cheesecake drops."
+>
+  <section class="home-section">
+    <div class="post-list">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+    <div class="leia-mais">
+      <a href="/blog">Leia Mais</a>
+    </div>
+  </section>
+</BlogPost>
+
+<style>
+  .home-section {
+    position: relative;
+    padding: 50px 0;
+  }
+
+  .home-section .post-list {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .post-list article {
+    flex: 1 1 47%;
+  }
+  .home-section  .leia-mais {
+    position: absolute;
+    left: 50%;
+    
+  }
+</style>

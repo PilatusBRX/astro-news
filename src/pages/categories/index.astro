@@ -1,0 +1,53 @@
+---
+import { getCollection } from "astro:content";
+import BlogPost from "@/layouts/BlogPost.astro";
+import { type BlogProps } from "@/types/blog";
+import { slugify } from "@/utils/slugify";
+
+const allPosts = (await getCollection("blog")) as BlogProps[];
+
+const categorias = [
+  ...new Set(allPosts.map((post) => post.data.categories).flat()),
+].sort();
+---
+
+<BlogPost title="Categorias" description="Explore todas as categorias do blog">
+  <h1>Categorias</h1>
+
+  <div class="categories-container">
+    {
+      categorias.map((category) => (
+        <a href={`/categories/${slugify(category)}`} class="category">
+          {category} (
+          {
+            allPosts.filter((post) => post.data.categories?.includes(category))
+              .length
+          }
+          )
+        </a>
+      ))
+    }
+  </div>
+</BlogPost>
+
+<style>
+  .categories-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .category {
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+
+  .category:hover {
+    background-color: #e0e0e0;
+  }
+</style>

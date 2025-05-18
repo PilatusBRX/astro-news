@@ -1,0 +1,58 @@
+---
+import { getCollection } from "astro:content";
+import BlogPost from "@/layouts/BlogPost.astro";
+import PostCard from "@/components/PostCard.astro";
+import { type BlogProps } from "@/types/blog";
+
+export async function getStaticPaths() {
+  //const allPosts = await getCollection("blog");
+  const allPosts = (await getCollection("blog")) as BlogProps[];
+
+  // Encontrar todos os autores únicos
+  const uniqueAuthors = [
+    ...new Set(allPosts.map((post) => post.data.author).filter(Boolean)),
+  ];
+
+  // Criar uma rota para cada autor
+  return uniqueAuthors.map((authorName) => {
+    const filteredPosts = allPosts.filter(
+      (post) => post.data.author === authorName && post.data.draft !== true
+    );
+    return {
+      params: { author: authorName.toLowerCase().replace(/\s+/g, "-") },
+      props: { authorName, posts: filteredPosts },
+    };
+  });
+}
+
+const { authorName, posts } = Astro.props;
+---
+
+<BlogPost
+  title={`Autor: ${authorName}`}
+  description={`Todos os posts escritos por ${authorName}`}
+>
+  <div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+      <h1 class="text-4xl font-bold mb-4">Autor: {authorName}</h1>
+      <p class="text-lg text-gray-600">
+        {posts.length}
+        {posts.length === 1 ? "post" : "posts"} publicados
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+
+    {
+      posts.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-xl text-gray-600">
+            Nenhum post encontrado para este autor.
+          </p>
+        </div>
+      )
+    }
+  </div>
+</BlogPost>

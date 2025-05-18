@@ -1,0 +1,157 @@
+---
+// Pagination.astro
+const { currentPage, totalPages, url } = Astro.props;
+
+// Cria um array com números de página para exibição limitada
+const getPageNumbers = () => {
+  const pageNumbers = [];
+  const delta = 2; // Quantidade de páginas visíveis antes e após a página atual
+
+  // Adiciona a primeira página
+  pageNumbers.push(1);
+
+  // Adiciona páginas ao redor da página atual
+  for (let i = currentPage - delta; i <= currentPage + delta; i++) {
+    if (i > 1 && i < totalPages) {
+      pageNumbers.push(i);
+    }
+  }
+
+  // Adiciona a última página
+  if (totalPages > 1) {
+    pageNumbers.push(totalPages);
+  }
+
+  // Adiciona reticências onde houver pulos
+  const withEllipsis = [];
+  let prev = 0;
+
+  for (const num of pageNumbers) {
+    if (prev + 1 !== num) {
+      withEllipsis.push("...");
+    }
+    withEllipsis.push(num);
+    prev = num;
+  }
+
+  return withEllipsis;
+};
+
+const pageNumbers = getPageNumbers();
+---
+
+<nav aria-label="Paginação" class="pagination">
+  {/* Botão Anterior */}
+  {
+    currentPage > 1 ? (
+      <a
+        href={currentPage - 1 === 1 ? url : `${url}/${currentPage - 1}`}
+        class="pagination-link prev"
+        aria-label="Página anterior"
+      >
+        &larr; Anterior
+      </a>
+    ) : (
+      <span class="pagination-link disabled">&larr; Anterior</span>
+    )
+  }
+
+  {/* Números das páginas */}
+  <div class="pagination-numbers">
+    {
+      pageNumbers.map((pageNumber) => {
+        return pageNumber === "..." ? (
+          <span class="ellipsis">...</span>
+        ) : (
+          <a
+            href={pageNumber === 1 ? url : `${url}/${pageNumber}`}
+            class={`pagination-link ${currentPage === pageNumber ? "active" : ""}`}
+            aria-current={currentPage === pageNumber ? "page" : undefined}
+            aria-label={`Ir para página ${pageNumber}`}
+          >
+            {pageNumber}
+          </a>
+        );
+      })
+    }
+  </div>
+
+  {/* Botão Próximo */}
+  {
+    currentPage < totalPages ? (
+      <a
+        href={`${url}/${currentPage + 1}`}
+        class="pagination-link next"
+        aria-label="Próxima página"
+      >
+        Próximo &rarr;
+      </a>
+    ) : (
+      <span class="pagination-link disabled">Próximo &rarr;</span>
+    )
+  }
+</nav>
+
+<style>
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+  }
+
+  .pagination-numbers {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .pagination-link {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    background-color: rgb(var(--white, 255, 255, 255));
+    color: rgb(var(--black, 0, 0, 0));
+    border: 1px solid rgb(var(--gray-light, 200, 200, 200));
+    transition: all 0.2s ease;
+  }
+
+  .pagination-link:hover:not(.disabled) {
+    background-color: rgb(var(--accent, 25, 131, 255));
+    color: rgb(var(--white, 255, 255, 255));
+    box-shadow: var(--box-shadow);
+  }
+
+  .pagination-link.active {
+    background-color: rgb(var(--accent, 25, 131, 255));
+    color: rgb(var(--white, 255, 255, 255));
+    font-weight: bold;
+  }
+
+  .pagination-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .prev,
+  .next {
+    font-weight: 500;
+  }
+
+  .ellipsis {
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+  }
+
+  @media (max-width: 720px) {
+    .pagination {
+      gap: 0.5rem;
+    }
+
+    .pagination-link {
+      padding: 0.25rem 0.5rem;
+    }
+  }
+</style>

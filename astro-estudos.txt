@@ -1,0 +1,28 @@
+
+- Imagens OK
+- Breadcrumbs OK
+- Icons OK
+import { Icon } from 'astro-icon/components'
+- página Tags OK
+- categorias OK
+- links de compartilhamento  OK
+- sidebar com relatedposts OK
+- tags clouds  OK
+- category clouds OK
+- Posts recentes OK
+- url amigável OK
+
+
+
+- Paginação
+- Layout
+
+- SSR 
+- SEO
+- redirecionamento das urls
+
+
+accessible-astro:
+https://accessible-astro.incluud.dev/components/overview/
+
+##ISO 8601 é a data correta da postagem a ser adicionada no pubDate

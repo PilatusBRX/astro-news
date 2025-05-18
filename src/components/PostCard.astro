@@ -1,0 +1,72 @@
+---
+import FormattedDate from "./FormattedDate.astro";
+import { Image } from "astro:assets";
+const { post } = Astro.props;
+const postUrl = `/blog/${post.id}`;
+const { heroImage, title, pubDate } = post.data;
+---
+
+<article>
+  <a href={postUrl}>
+    <Image
+      width={500}
+      height={320}
+      object-fit="cover"
+      src={heroImage}
+      alt={title}
+      loading="lazy"
+      decoding="async"
+      format="webp"
+      quality="mid"
+    />
+    <h4 class="title">{title}</h4>
+
+    <timae class="date">
+      <FormattedDate date={pubDate} />
+    </timae>
+  
+  </a>
+</article>
+<style>
+  article {
+    width: calc(50% - 1rem);
+  }
+  article * {
+    text-decoration: none;
+    transition: 0.2s ease;
+  }
+
+  article img {
+    margin-bottom: 0.5rem;
+    border-radius: 12px;
+  }
+
+  .title {
+    margin: 0;
+    color: rgb(var(--black));
+    line-height: 1;
+  }
+  .date {
+    margin: 0;
+    color: rgb(var(--gray));
+  }
+  article a:hover h4,
+  ul li a:hover .date {
+    color: rgb(var(--accent));
+  }
+  article a:hover img {
+    box-shadow: var(--box-shadow);
+  }
+  @media (max-width: 720px) {
+    article {
+      width: 100%;
+      text-align: center;
+    }
+    article:first-child {
+      margin-bottom: 0;
+    }
+    article:first-child .title {
+      font-size: 1.563em;
+    }
+  }
+</style>

@@ -1,0 +1,58 @@
+---
+import { getCollection } from "astro:content";
+import PostCard from "./PostCard.astro";
+import Pagination from "./Pagination.astro";
+import { type BlogProps } from "@/types/blog";
+
+//Quantos posts por página
+const { page = 1, postsPerPage = 8 } = Astro.props;
+
+// Converte para número caso venha como string
+const currentPage = typeof page === "string" ? parseInt(page) : page;
+
+// Busca todos os posts ordenados por data
+const allPosts = ((await getCollection("blog")) as BlogProps[]).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+// Calcula o total de páginas
+const totalPages = Math.ceil(allPosts.length / postsPerPage);
+
+// Obtém os posts para a página atual
+const startIndex = (currentPage - 1) * postsPerPage;
+const endIndex = startIndex + postsPerPage;
+const posts = allPosts.slice(startIndex, endIndex);
+
+// URL base para paginação (sem barra no final)
+const paginationUrl = "/blog";
+---
+
+<div class="post-list">
+  {posts.map((post) => <PostCard post={post} />)}
+</div>
+
+{
+  totalPages > 1 && (
+    <Pagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      url={paginationUrl}
+    />
+  )
+}
+
+<style>
+  .post-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (max-width: 720px) {
+    .post-list {
+      gap: 0.5em;
+    }
+  }
+</style>
