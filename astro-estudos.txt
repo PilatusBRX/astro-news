@@ -10,16 +10,17 @@ import { Icon } from 'astro-icon/components'
 - tags clouds  OK
 - category clouds OK
 - Posts recentes OK
-- url amigável OK
+- Paginação OK
+- redirecionamento das urls OK
 
 
 
-- Paginação
+
+- url amigável
+
 - Layout
-
-- SSR 
 - SEO
-- redirecionamento das urls
+
 
 
 accessible-astro:
