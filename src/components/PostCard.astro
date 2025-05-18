@@ -2,7 +2,7 @@
 import FormattedDate from "./FormattedDate.astro";
 import { Image } from "astro:assets";
 const { post } = Astro.props;
-const postUrl = `/blog/${post.id}`;
+const postUrl = `/blog/${post.id}/`;
 const { heroImage, title, pubDate } = post.data;
 ---
 

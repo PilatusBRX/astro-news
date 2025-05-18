@@ -29,7 +29,7 @@ const totalPages = Math.ceil(allPosts.length / postsPerPage);
 
 // Redireciona para a primeira página se a página for inválida ou for a página 1
 if (page > totalPages || page == 1) {
-  return Astro.redirect("/blog");
+  return Astro.redirect("/blog/");
 }
 ---
 

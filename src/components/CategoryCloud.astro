@@ -17,7 +17,7 @@ const categorias = [
   <div class="categories-container">
     {
       categorias.map((category) => (
-        <a href={`/categories/${category}`} class="category">
+        <a href={`/categories/${category}/`} class="category">
           {category} (
           {
             allPosts.filter((post) => post.data.categories?.includes(category))

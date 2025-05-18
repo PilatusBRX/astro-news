@@ -64,7 +64,7 @@ const { title, pubDate, heroImage, author, categories, tags = [] } = post.data;
     <div class="tags">
       {
         tags.map((tag: string) => (
-          <a href={`/tags/${tag}`} class="tag">
+          <a href={`/tags/${tag}/`} class="tag">
             {tag}
           </a>
         ))
@@ -77,7 +77,7 @@ const { title, pubDate, heroImage, author, categories, tags = [] } = post.data;
     <div class="tags">
       {
         categories.map((category: string) => (
-          <a href={`/categories/${category}`} class="tag">
+          <a href={`/categories/${category}/`} class="tag">
             {category}
           </a>
         ))

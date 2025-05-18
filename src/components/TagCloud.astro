@@ -15,7 +15,7 @@ const tags = [...new Set(allPosts.map((post) => post.data.tags).flat())].sort();
   <div class="categories-container">
     {
       tags.map((tag) => (
-        <a href={`/tags/${tag}`} class="category">
+        <a href={`/tags/${tag}/`} class="category">
           {tag} (
           {allPosts.filter((post) => post.data.tags?.includes(tag)).length})
         </a>
