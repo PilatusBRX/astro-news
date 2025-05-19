@@ -3,6 +3,7 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import BlogPost from "@/layouts/BlogPost.astro";
 import PostCard from "@/components/PostCard.astro";
 import { type BlogProps } from "@/types/blog";
+import { slugify } from "@/utils/slugify";
 
 // Função para obter os caminhos estáticos com paginação
 export const getStaticPaths = async ({ paginate }) => {
@@ -21,7 +22,7 @@ export const getStaticPaths = async ({ paginate }) => {
 
     // Use paginate para criar páginas para esta tag
     return paginate(filteredPosts, {
-      params: { category },
+      params: { category: slugify(category) },
       pageSize: 2,
       props: { category },
     });

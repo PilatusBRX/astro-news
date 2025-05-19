@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BlogPost from "@/layouts/BlogPost.astro";
 import PostCard from "@/components/PostCard.astro";
 import { type BlogProps } from "@/types/blog";
+import { slugify } from "@/utils/slugify";
 
 export async function getStaticPaths() {
   //const allPosts = await getCollection("blog");
@@ -19,7 +20,7 @@ export async function getStaticPaths() {
       (post) => post.data.author === authorName && post.data.draft !== true
     );
     return {
-      params: { author: authorName.toLowerCase().replace(/\s+/g, "-") },
+      params: { author: slugify(authorName) },
       props: { authorName, posts: filteredPosts },
     };
   });
